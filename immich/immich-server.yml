@@ -24,6 +24,7 @@ services:
       - .env
     # ports:
     #   - '2283:2283'
+    mem_limit: 1gb
     network_mode: container:tailscale
     restart: always
     healthcheck:
