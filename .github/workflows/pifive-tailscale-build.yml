@@ -1,0 +1,41 @@
+name: Deploy pifive-tailscale
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tailscales/pifive-tailscale.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tailscale Connection
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          tags: tag:ci
+          version: latest
+          ping: ${{ vars.PIFIVE_TAILSCALE_HOST }}
+      - name: Deploy
+        run: |
+          # Update repository
+          ssh -o "StrictHostKeyChecking=no" ${{ vars.PIFIVE_TAILSCALE_USER }}@${{ vars.PIFIVE_TAILSCALE_HOST }} "
+            if [ ! -d ~/docker-composes ]; then
+              git clone https://github.com/${{ github.repository }}.git ~/docker-composes
+            else
+              cd ~/docker-composes
+              git pull
+            fi
+          "
+
+          # Copy .env file to remote
+          scp -o "StrictHostKeyChecking=no" .env ${{ vars.PIFIVE_TAILSCALE_USER }}@${{ vars.PIFIVE_TAILSCALE_HOST }}:~/docker-composes/tailscales/.env
+
+          # Start services
+          ssh -o "StrictHostKeyChecking=no" ${{ vars.PIFIVE_TAILSCALE_USER }}@${{ vars.PIFIVE_TAILSCALE_HOST }} "
+            cd ~/docker-composes/tailscales
+            docker compose -f pifive-tailscale.yml up -d
+          "
