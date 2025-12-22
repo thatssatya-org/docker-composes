@@ -39,5 +39,5 @@ jobs:
           # Start services
           ssh -o "StrictHostKeyChecking=no" ${{ vars.IMMICH_POSTGRES_USER }}@${{ vars.IMMICH_POSTGRES_HOST }} "
             cd ~/docker-composes/immich
-            docker compose -f postgres.yml up -d
+            docker compose -f postgres.yml up -d --force-recreate
           "

@@ -39,5 +39,5 @@ jobs:
           # Start services
           ssh -o "StrictHostKeyChecking=no" ${{ vars.IMMICH_ML_USER }}@${{ vars.IMMICH_ML_HOST }} "
             cd ~/docker-composes/immich
-            docker compose -f immich-machine-learning.yml up -d
+            docker compose -f immich-machine-learning.yml up -d --force-recreate
           "

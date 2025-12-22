@@ -39,5 +39,5 @@ jobs:
           # Start services
           ssh -o "StrictHostKeyChecking=no" ${{ vars.IMMICH_SERVER_USER }}@${{ vars.IMMICH_SERVER_HOST }} "
             cd ~/docker-composes/immich
-            docker compose -f immich-server.yml up -d
+            docker compose -f immich-server.yml up -d --force-recreate
           "
