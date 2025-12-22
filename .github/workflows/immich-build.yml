@@ -8,6 +8,14 @@ on:
       - 'immich/immich-server.yml'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SSH_USER: ${{ vars.IMMICH_SERVER_USER }}
+  SSH_HOST: ${{ vars.IMMICH_SERVER_HOST }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,26 +26,30 @@ jobs:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           tags: tag:ci
           version: latest
-          ping: ${{ vars.IMMICH_SERVER_HOST }}
+          ping: ${{ env.SSH_HOST }}
+
       - name: Create .env file
         run: echo "${{ secrets.IMMICH_DOT_ENV_SECRETS }}" > .env
+
+      - name: Copy .env file to remote
+        run: |
+          scp -o "StrictHostKeyChecking=no" .env ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:/tmp/.immich.env
+
       - name: Deploy
         run: |
-          # Update repository
-          ssh -o "StrictHostKeyChecking=no" ${{ vars.IMMICH_SERVER_USER }}@${{ vars.IMMICH_SERVER_HOST }} "
+          ssh -o "StrictHostKeyChecking=no" ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            # Update repository
             if [ ! -d ~/docker-composes ]; then
               git clone https://github.com/${{ github.repository }}.git ~/docker-composes
             else
               cd ~/docker-composes
               git pull
             fi
-          "
 
-          # Copy .env file to remote
-          scp -o "StrictHostKeyChecking=no" .env ${{ vars.IMMICH_SERVER_USER }}@${{ vars.IMMICH_SERVER_HOST }}:~/docker-composes/immich/.env
+            # Move .env file
+            mv /tmp/.immich.env ~/docker-composes/immich/.env
 
-          # Start services
-          ssh -o "StrictHostKeyChecking=no" ${{ vars.IMMICH_SERVER_USER }}@${{ vars.IMMICH_SERVER_HOST }} "
+            # Start services
             cd ~/docker-composes/immich
             docker compose -f immich-server.yml up -d --force-recreate
           "
