@@ -31,4 +31,19 @@ jobs:
             fi
             cd ~/docker-composes/tailscales
             docker compose -f pifive-tailscale.yml up -d --force-recreate
+
+            echo 'Waiting for tailscaled to be ready...'
+            sleep 10
+
+            # Reads the variable, replaces commas with spaces (just in case), and loops
+            RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'
+            
+            echo \"Starting loop for services: \$RAW_SERVICES\"
+            
+            for SERVICE in \$(echo \"\$RAW_SERVICES\" | tr ',' ' '); do
+              echo \"Processing service: \$SERVICE\"
+              
+              # We add '|| true' so one failure doesn't stop the whole deployment
+              docker exec tailscale tailscale serve advertise \$SERVICE || echo \"Failed to advertise \$SERVICE\"
+            done
           "
