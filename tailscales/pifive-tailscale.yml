@@ -7,8 +7,6 @@ services:
       - SYS_MODULE
       - SYS_ADMIN
     cpu_shares: 50
-    command:
-      - /usr/local/bin/tailscale serve advertise svc:immich
     container_name: tailscale
     deploy:
       resources:
