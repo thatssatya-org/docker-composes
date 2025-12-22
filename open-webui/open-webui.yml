@@ -1,0 +1,9 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    volumes:
+      - ~/apps/open-webui/data:/app/backend/data
+    network_mode: container:tailscale
+    mem_limit: 1g
+    restart: unless-stopped
