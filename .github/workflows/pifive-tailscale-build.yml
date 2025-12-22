@@ -29,13 +29,6 @@ jobs:
               cd ~/docker-composes
               git pull
             fi
-          "
-
-          # Copy .env file to remote
-          scp -o "StrictHostKeyChecking=no" .env ${{ vars.PIFIVE_TAILSCALE_USER }}@${{ vars.PIFIVE_TAILSCALE_HOST }}:~/docker-composes/tailscales/.env
-
-          # Start services
-          ssh -o "StrictHostKeyChecking=no" ${{ vars.PIFIVE_TAILSCALE_USER }}@${{ vars.PIFIVE_TAILSCALE_HOST }} "
             cd ~/docker-composes/tailscales
             docker compose -f pifive-tailscale.yml up -d
           "
