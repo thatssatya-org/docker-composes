@@ -6,5 +6,6 @@ services:
     mem_limit: 100mb
     environment:
       - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=15
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
