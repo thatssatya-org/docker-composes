@@ -36,7 +36,7 @@ services:
         source: /dev/net/tun
         target: /dev/net/tun
       - type: bind
-        source: ~/apps/pifive-tailscale/config
+        source: ${HOME}/apps/pifive-tailscale/config
         target: /usr/tailscale/config
     x-casaos:
       envs:
