@@ -6,6 +6,7 @@ services:
     command: tail -f /dev/null
     restart: always
     mem_limit: 20mb
+    hostname: tailscale
     networks:
       - nginxproxymanager
 
@@ -32,7 +33,6 @@ services:
       # - TS_ROUTES=
       - TS_SERVE_CONFIG=/usr/tailscale/config/serve.json
       - TS_STATE_DIR=/var/lib/tailscale
-    hostname: tailscale
     image: tailscale/tailscale:latest
     labels:
       icon: https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Tailscale/icon.png
