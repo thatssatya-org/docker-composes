@@ -50,13 +50,18 @@ jobs:
           ping: ${{ inputs.ssh_host }}
 
       - name: Create .env file
-        if: ${{ secrets.env_file_contents != '' }}
-        run: echo "${{ secrets.env_file_contents }}" > .env
+        env:
+          ENV_CONTENTS: ${{ secrets.env_file_contents }}
+        run: |
+          if [ -n "$ENV_CONTENTS" ]; then
+            echo "$ENV_CONTENTS" > .env
+          fi
 
       - name: Copy .env file to remote
-        if: ${{ secrets.env_file_contents != '' }}
         run: |
-          scp -o "StrictHostKeyChecking=no" .env ${{ inputs.ssh_user }}@${{ inputs.ssh_host }}:/tmp/.${{ inputs.app_directory }}.env
+          if [ -f .env ]; then
+            scp -o "StrictHostKeyChecking=no" .env ${{ inputs.ssh_user }}@${{ inputs.ssh_host }}:/tmp/.${{ inputs.app_directory }}.env
+          fi
 
       - name: Deploy
         run: |
