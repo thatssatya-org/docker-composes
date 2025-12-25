@@ -1,6 +1,7 @@
 name: tailscale
 services:
   network-holder:
+    container_name: network-holder
     image: alpine
     command: sleep infinity
     restart: always
