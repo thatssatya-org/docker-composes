@@ -9,11 +9,11 @@ services:
     network_mode: container:network-holder
     # network_mode: host
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "ping", "-c", "2", "100.100.100.100"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-    labels:
-      - "autoheal=true"
+    # healthcheck:
+    #   test: ["CMD", "ping", "-c", "2", "100.100.100.100"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 30s
+    # labels:
+      # - "autoheal=true"
