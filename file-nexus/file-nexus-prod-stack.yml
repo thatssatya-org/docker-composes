@@ -6,7 +6,7 @@ services:
     image: thatssatyadocker/file-nexus:latest
     env_file:
       - .env
-    network_mode: container:tailscale
+    network_mode: container:network-holder
     # network_mode: host
     restart: unless-stopped
     healthcheck:
