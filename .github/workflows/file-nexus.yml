@@ -1,0 +1,21 @@
+name: Deploy File Nexus
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  prod-deploy:
+    runs-on: self-hosted
+    environment: production      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Create .env file
+        run: echo "${{ secrets.FILE_NEXUS_DOT_ENV_SECRETS }}" > .env
+      - name: Prod Deploy
+        run: |
+          cd ./file-nexus
+          docker compose --file file-nexus-prod-stack.yml pull
+          docker compose --file file-nexus-prod-stack.yml up --detach --force-recreate --remove-orphans
+      - name: Prune Dangling images
+        run: docker image prune -f
