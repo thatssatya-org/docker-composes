@@ -22,14 +22,16 @@ jobs:
       docker_compose_file: pifive-tailscale.yml
       # The post_deploy_script is executed inside the SSH session.
       # We need to escape properly to ensure the shell on the remote interprets it correctly.
-      post_deploy_script: |
-        echo 'Waiting for tailscaled to be ready...'
-        sleep 10
-        RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'
-        echo "Starting loop for services: $RAW_SERVICES"
-        for SERVICE in $(echo "$RAW_SERVICES" | tr ',' ' '); do
-          echo "Processing service: $SERVICE"
-          docker exec tailscale tailscale serve advertise $SERVICE || echo "Failed to advertise $SERVICE"
-        done
+      # post_deploy_script: |
+      #   echo 'Waiting for tailscaled to be ready...'
+      #   sleep 10
+      #   RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'
+      #   echo "Starting loop for services: $RAW_SERVICES"
+      #   for SERVICE in $(echo "$RAW_SERVICES" | tr ',' ' '); do
+      #     echo "Processing service: $SERVICE"
+      #     docker exec tailscale tailscale serve advertise svc:$SERVICE || echo "Failed to advertise $SERVICE"
+      #   done
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+      env_file_contents: |
+        RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'

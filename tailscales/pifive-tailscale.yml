@@ -156,6 +156,38 @@ services:
     ports: []
     devices: []
 
+  tailscale-services-advertiser:
+    depends_on:
+      - tailscale
+    image: docker:cli
+    command: >
+      sh -c '
+        echo "Waiting for tailscale container to be ready..."
+        until docker exec tailscale tailscale status > /dev/null 2>&1; do
+          sleep 5
+        done
+        echo "Tailscale is ready."
+
+        if [ -n "$RAW_SERVICES" ]; then
+          echo "Found services to advertise: $RAW_SERVICES"
+          for SERVICE in $(echo "$RAW_SERVICES" | tr "," " "); do
+            echo "Advertising service: $SERVICE"
+            docker exec tailscale tailscale serve advertise "svc:$SERVICE" || echo "Failed to advertise $SERVICE"
+          done
+        else
+          echo "No RAW_SERVICES provided."
+        fi
+
+        echo "Advertisement process finished. Exiting."
+        exit 0
+      '
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    networks:
+      - nginxproxymanager
+
 networks:
   nginxproxymanager:
     name: nginxproxymanager
