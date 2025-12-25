@@ -169,8 +169,12 @@ services:
         echo "Tailscale is ready."
 
         if [ -n "$RAW_SERVICES" ]; then
-          echo "Found services to advertise: $RAW_SERVICES"
-          for SERVICE in $(echo "$RAW_SERVICES" | tr "," " "); do
+          echo "Found services to advertise using RAW_SERVICES variable."
+          # Remove single/double quotes and replace commas with spaces
+          CLEAN_SERVICES=$(echo "$RAW_SERVICES" | tr -d "\047\042" | tr "," " ")
+          
+          for SERVICE in $CLEAN_SERVICES; do
+            if [ -z "$SERVICE" ]; then continue; fi
             echo "Advertising service: $SERVICE"
             docker exec tailscale tailscale serve advertise "svc:$SERVICE" || echo "Failed to advertise $SERVICE"
           done
