@@ -38,7 +38,7 @@ on:
         description: "Contents of the .env file"
 
 jobs:
-  deploy:
+  prod-deploy:
     runs-on: ubuntu-latest
     environment: production
     steps:
