@@ -1,5 +1,13 @@
 name: tailscale
 services:
+  network-holder:
+    image: alpine
+    command: sleep infinity
+    restart: always
+    mem_limit: 20mb
+    networks:
+      - nginxproxymanager
+
   tailscale:
     cap_add:
       - NET_ADMIN
@@ -8,6 +16,7 @@ services:
       - SYS_ADMIN
     cpu_shares: 50
     container_name: tailscale
+    network_mode: service:network-holder
     deploy:
       resources:
         limits:
@@ -145,8 +154,7 @@ services:
             zh_CN: VPN TUN设备
     ports: []
     devices: []
-    networks:
-      - nginxproxymanager
+
 networks:
   nginxproxymanager:
     name: nginxproxymanager
