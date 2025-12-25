@@ -1,0 +1,25 @@
+name: Deploy Autoheal
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'autoheal/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-compose.yml
+    with:
+      ssh_user: ${{ vars.FILE_NEXUS_SERVER_USER }}
+      ssh_host: ${{ vars.FILE_NEXUS_SERVER_HOST }}
+      app_directory: autoheal
+      docker_compose_file: autoheal-stack.yml
+    secrets:
+      tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+      env_file_contents: ${{ secrets.FILE_NEXUS_DOT_ENV_SECRETS }}
