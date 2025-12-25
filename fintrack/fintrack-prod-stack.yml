@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: thatssatyadocker/fintrack-dashboard:latest
+    container_name: fintrack-frontend
+    mem_limit: 128m
+    # ports:
+    #   - "80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - nginxproxymanager
+
+networks:
+  nginxproxymanager:
+    external: true
