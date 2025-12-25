@@ -3,7 +3,7 @@ services:
   network-holder:
     container_name: network-holder
     image: alpine
-    command: sleep infinity
+    command: tail -f /dev/null
     restart: always
     mem_limit: 20mb
     networks:
