@@ -11,8 +11,9 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "ping", "-c", "2", "100.100.100.100"]
-      interval: 20s
+      interval: 5s
       timeout: 5s
       retries: 3
+      start_period: 30s
     labels:
       - "autoheal=true"
