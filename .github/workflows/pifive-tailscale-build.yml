@@ -12,49 +12,24 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  SSH_USER: ${{ vars.PIFIVE_TAILSCALE_USER }}
-  SSH_HOST: ${{ vars.PIFIVE_TAILSCALE_HOST }}
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Tailscale Connection
-        uses: tailscale/github-action@v4
-        with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          tags: tag:ci
-          version: latest
-          ping: ${{ env.SSH_HOST }}
-
-      - name: Deploy
-        run: |
-          ssh -o "StrictHostKeyChecking=no" ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
-            # Update repository
-            if [ ! -d ~/docker-composes ]; then
-              git clone https://github.com/${{ github.repository }}.git ~/docker-composes
-            else
-              cd ~/docker-composes
-              git pull
-            fi
-            
-            # Start Service
-            cd ~/docker-composes/tailscales
-            docker compose -f pifive-tailscale.yml up -d --force-recreate
-
-            # echo 'Waiting for tailscaled to be ready...'
-            # sleep 10
-
-            # # Reads the variable, replaces commas with spaces (just in case), and loops
-            # RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'
-            
-            # echo \"Starting loop for services: \$RAW_SERVICES\"
-            
-            # for SERVICE in \$(echo \"\$RAW_SERVICES\" | tr ',' ' '); do
-            #   echo \"Processing service: \$SERVICE\"
-              
-            #   # We add '|| true' so one failure doesn't stop the whole deployment
-            #   docker exec tailscale tailscale serve advertise \$SERVICE || echo \"Failed to advertise \$SERVICE\"
-            # done
-          "
+    uses: ./.github/workflows/deploy-compose.yml
+    with:
+      ssh_user: ${{ vars.PIFIVE_TAILSCALE_USER }}
+      ssh_host: ${{ vars.PIFIVE_TAILSCALE_HOST }}
+      app_directory: tailscales
+      docker_compose_file: pifive-tailscale.yml
+      # The post_deploy_script is executed inside the SSH session.
+      # We need to escape properly to ensure the shell on the remote interprets it correctly.
+      post_deploy_script: |
+        echo 'Waiting for tailscaled to be ready...'
+        sleep 10
+        RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'
+        echo "Starting loop for services: $RAW_SERVICES"
+        for SERVICE in $(echo "$RAW_SERVICES" | tr ',' ' '); do
+          echo "Processing service: $SERVICE"
+          docker exec tailscale tailscale serve advertise $SERVICE || echo "Failed to advertise $SERVICE"
+        done
+    secrets:
+      tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}

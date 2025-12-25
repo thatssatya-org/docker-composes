@@ -1,0 +1,87 @@
+name: Reusable Deploy
+
+on:
+  workflow_call:
+    inputs:
+      ssh_user:
+        required: true
+        type: string
+        description: "SSH Username"
+      ssh_host:
+        required: true
+        type: string
+        description: "SSH Hostname/IP"
+      app_directory:
+        required: true
+        type: string
+        description: "Directory containing the docker-compose file (relative to repo root)"
+      docker_compose_file:
+        required: true
+        type: string
+        description: "Name of the docker-compose file"
+      repo_dir:
+        required: false
+        type: string
+        default: "~/docker-composes"
+        description: "Directory on the remote server where the repo is cloned"
+      post_deploy_script:
+        required: false
+        type: string
+        default: ""
+        description: "Optional script to run after deployment"
+    secrets:
+      tailscale_authkey:
+        required: true
+        description: "Tailscale Auth Key"
+      env_file_contents:
+        required: false
+        description: "Contents of the .env file"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tailscale Connection
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.tailscale_authkey }}
+          tags: tag:ci
+          version: latest
+          ping: ${{ inputs.ssh_host }}
+
+      - name: Create .env file
+        if: ${{ secrets.env_file_contents != '' }}
+        run: echo "${{ secrets.env_file_contents }}" > .env
+
+      - name: Copy .env file to remote
+        if: ${{ secrets.env_file_contents != '' }}
+        run: |
+          scp -o "StrictHostKeyChecking=no" .env ${{ inputs.ssh_user }}@${{ inputs.ssh_host }}:/tmp/.${{ inputs.app_directory }}.env
+
+      - name: Deploy
+        run: |
+          ssh -o "StrictHostKeyChecking=no" ${{ inputs.ssh_user }}@${{ inputs.ssh_host }} "
+            # Update repository
+            if [ ! -d ${{ inputs.repo_dir }} ]; then
+              git clone https://github.com/${{ github.repository }}.git ${{ inputs.repo_dir }}
+            else
+              cd ${{ inputs.repo_dir }}
+              git pull
+            fi
+
+            # Move .env file if it was created
+            if [ -f /tmp/.${{ inputs.app_directory }}.env ]; then
+              mv /tmp/.${{ inputs.app_directory }}.env ${{ inputs.repo_dir }}/${{ inputs.app_directory }}/.env
+            fi
+
+            # Start services
+            cd ${{ inputs.repo_dir }}/${{ inputs.app_directory }}
+            docker compose -f ${{ inputs.docker_compose_file }} pull
+            docker compose -f ${{ inputs.docker_compose_file }} up -d --force-recreate --remove-orphans
+            
+            # Prune dangling images
+            docker image prune -f
+            
+            # Run post-deploy script
+            ${{ inputs.post_deploy_script }}
+          "

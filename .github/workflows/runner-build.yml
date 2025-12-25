@@ -12,44 +12,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  SSH_USER: ${{ vars.IMMICH_SERVER_USER }}
-  SSH_HOST: ${{ vars.IMMICH_SERVER_HOST }}
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Tailscale Connection
-        uses: tailscale/github-action@v4
-        with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          tags: tag:ci
-          version: latest
-          ping: ${{ env.SSH_HOST }}
-
-      - name: Create .env file
-        run: echo "${{ secrets.RUNNER_DOT_ENV_SECRETS }}" > .env
-
-      - name: Copy .env file to remote
-        run: |
-          scp -o "StrictHostKeyChecking=no" .env ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:/tmp/.action-runner.env
-
-      - name: Deploy
-        run: |
-          ssh -o "StrictHostKeyChecking=no" ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
-            # Update repository
-            if [ ! -d ~/docker-composes ]; then
-              git clone https://github.com/${{ github.repository }}.git ~/docker-composes
-            else
-              cd ~/docker-composes
-              git pull
-            fi
-
-            # Move .env file
-            mv /tmp/.action-runner.env ~/docker-composes/action-runner/.env
-
-            # Start services
-            cd ~/docker-composes/action-runner
-            docker compose -f runner.yml up -d --force-recreate
-          "
+    uses: ./.github/workflows/deploy-compose.yml
+    with:
+      ssh_user: ${{ vars.IMMICH_SERVER_USER }}
+      ssh_host: ${{ vars.IMMICH_SERVER_HOST }}
+      app_directory: action-runner
+      docker_compose_file: runner.yml
+    secrets:
+      tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+      env_file_contents: ${{ secrets.RUNNER_DOT_ENV_SECRETS }}
