@@ -25,7 +25,7 @@ services:
     # ports:
     #   - '2283:2283'
     mem_limit: 1g
-    network_mode: container:tailscale
+    network_mode: container:network-holder
     restart: always
     healthcheck:
       disable: false
