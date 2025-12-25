@@ -1,21 +1,59 @@
 name: Deploy File Nexus
 
 on:
-  workflow_dispatch: 
+  push:
+    branches:
+      - main
+    paths:
+      - 'file-nexus/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SSH_USER: ${{ vars.FILE_NEXUS_SERVER_USER }}
+  SSH_HOST: ${{ vars.FILE_NEXUS_SERVER_HOST }}
 
 jobs:
-  prod-deploy:
-    runs-on: self-hosted
-    environment: production      
+  deploy:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Tailscale Connection
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          tags: tag:ci
+          version: latest
+          ping: ${{ env.SSH_HOST }}
+
       - name: Create .env file
-        run: echo "${{ secrets.FILE_NEXUS_DOT_ENV_SECRETS }}" > ./file-nexus/.env
-      - name: Prod Deploy
+        run: echo "${{ secrets.FILE_NEXUS_DOT_ENV_SECRETS }}" > .env
+
+      - name: Copy .env file to remote
         run: |
-          cd ./file-nexus
-          docker compose --file file-nexus-prod-stack.yml pull
-          docker compose --file file-nexus-prod-stack.yml up --detach --force-recreate --remove-orphans
-      - name: Prune Dangling images
-        run: docker image prune -f
+          scp -o "StrictHostKeyChecking=no" .env ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:/tmp/.file-nexus.env
+
+      - name: Deploy
+        run: |
+          ssh -o "StrictHostKeyChecking=no" ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            # Update repository
+            if [ ! -d ~/docker-composes ]; then
+              git clone https://github.com/${{ github.repository }}.git ~/docker-composes
+            else
+              cd ~/docker-composes
+              git pull
+            fi
+
+            # Move .env file
+            mv /tmp/.file-nexus.env ~/docker-composes/file-nexus/.env
+
+            # Start services
+            cd ~/docker-composes/file-nexus
+            docker compose -f file-nexus-prod-stack.yml pull
+            docker compose -f file-nexus-prod-stack.yml up -d --force-recreate --remove-orphans
+            
+            # Prune Dangling images
+            docker image prune -f
+          "
