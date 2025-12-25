@@ -7,5 +7,6 @@ services:
     environment:
       - AUTOHEAL_CONTAINER_LABEL=all
       - AUTOHEAL_DEFAULT_STOP_TIMEOUT=15
+      - AUTOHEAL_ONLY_MONITOR_RUNNING=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
