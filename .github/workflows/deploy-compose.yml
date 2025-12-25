@@ -40,6 +40,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Tailscale Connection
         uses: tailscale/github-action@v4
