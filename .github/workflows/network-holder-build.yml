@@ -1,11 +1,11 @@
-name: Deploy pifive-tailscale
+name: Deploy network-holder
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'tailscales/pifive-tailscale.yml'
+      - 'tailscales/network-holder.yml'
   workflow_dispatch:
 
 concurrency:
@@ -19,8 +19,6 @@ jobs:
       ssh_user: ${{ vars.PIFIVE_TAILSCALE_USER }}
       ssh_host: ${{ vars.PIFIVE_TAILSCALE_HOST }}
       app_directory: tailscales
-      docker_compose_file: pifive-tailscale.yml
+      docker_compose_file: network-holder.yml
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-      env_file_contents: |
-        RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'

@@ -1,0 +1,15 @@
+services:
+  network-holder:
+    container_name: network-holder
+    image: alpine
+    command: tail -f /dev/null
+    restart: always
+    mem_limit: 20mb
+    hostname: tailscale
+    networks:
+      - nginxproxymanager
+
+networks:
+  nginxproxymanager:
+    name: nginxproxymanager
+    external: true

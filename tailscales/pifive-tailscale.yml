@@ -1,15 +1,5 @@
 name: tailscale
 services:
-  network-holder:
-    container_name: network-holder
-    image: alpine
-    command: tail -f /dev/null
-    restart: always
-    mem_limit: 20mb
-    hostname: tailscale
-    networks:
-      - nginxproxymanager
-
   tailscale:
     cap_add:
       - NET_ADMIN
@@ -18,7 +8,7 @@ services:
       - SYS_ADMIN
     cpu_shares: 50
     container_name: tailscale
-    network_mode: service:network-holder
+    network_mode: container:network-holder
     deploy:
       resources:
         limits:
