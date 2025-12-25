@@ -1,0 +1,22 @@
+services:
+  runner:
+    image: thatssatyadocker/github-runner:latest
+    restart: unless-stopped
+    environment:
+      - ORGANIZATION=thatssatya-org
+      - ACCESS_TOKEN=${GITHUB_ACTION_RUNNER_ACCESS_TOKEN}
+      - DOCKER_GID=992
+    group_add:
+      - 992
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: replicated
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.35'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
