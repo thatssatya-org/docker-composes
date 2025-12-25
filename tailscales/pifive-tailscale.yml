@@ -159,6 +159,7 @@ services:
 networks:
   nginxproxymanager:
     name: nginxproxymanager
+    external: true
 x-casaos:
   architectures:
     - amd64
