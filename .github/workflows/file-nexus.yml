@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Create .env file
-        run: echo "${{ secrets.FILE_NEXUS_DOT_ENV_SECRETS }}" > .env
+        run: echo "${{ secrets.FILE_NEXUS_DOT_ENV_SECRETS }}" > ./file-nexus/.env
       - name: Prod Deploy
         run: |
           cd ./file-nexus
