@@ -50,6 +50,6 @@ jobs:
             mv /tmp/.action-runner.env ~/docker-composes/action-runner/.env
 
             # Start services
-            cd ~/docker-composes/immich
+            cd ~/docker-composes/action-runner
             docker compose -f runner.yml up -d --force-recreate
           "
