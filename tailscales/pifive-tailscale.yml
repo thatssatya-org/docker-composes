@@ -31,9 +31,9 @@ services:
         reservations:
           memory: "134217728"
     environment:
-      - TS_ACCEPT_DNS=true
+      # - TS_ACCEPT_DNS=true
       - TS_AUTHKEY=
-      - TS_EXTRA_ARGS=--advertise-exit-node=true --ssh --accept-routes --advertise-tags=tag:pifive-container-gateway
+      - TS_EXTRA_ARGS=--accept-dns=true --advertise-exit-node=true --ssh --accept-routes --advertise-tags=tag:pifive-container-gateway
       - TS_HOSTNAME=pifive-tailscale
       # - TS_ROUTES=
       - TS_SERVE_CONFIG=/usr/tailscale/config/serve.json
