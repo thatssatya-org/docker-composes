@@ -5,6 +5,7 @@ RUN apt-get update && \
     wakeonlan \
     iputils-ping \
     tzdata && \
+    netbase && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

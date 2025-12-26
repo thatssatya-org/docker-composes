@@ -17,7 +17,7 @@ while true; do
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Target is UP. Sleeping..."
     else
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Target is DOWN. Sending Magic Packet..."
-        wakeonlan "$TARGET_MAC"
+        wakeonlan -p 9 "$TARGET_MAC"
     fi
     
     # Wait before next check
