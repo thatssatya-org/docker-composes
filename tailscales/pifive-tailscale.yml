@@ -12,7 +12,7 @@ services:
 
   tailscale:
     # depends_on:
-      # - network-holder
+    #   - network-holder
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -38,6 +38,8 @@ services:
       # - TS_ROUTES=
       - TS_SERVE_CONFIG=/usr/tailscale/config/serve.json
       - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SOCKS5_SERVER=0.0.0.0:1055
+      - TS_OUTBOUND_HTTP_PROXY_LISTEN=0.0.0.0:1055
     image: tailscale/tailscale:latest
     labels:
       icon: https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Tailscale/icon.png
