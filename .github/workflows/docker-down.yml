@@ -5,20 +5,52 @@ on:
     inputs:
       ssh_user:
         required: true
-        type: string
-        description: "SSH Username"
+        type: choice
+        description: "SSH Username Variable Name"
+        options:
+          - FILE_NEXUS_SERVER_USER
+          - IMMICH_ML_USER
+          - IMMICH_SERVER_USER
+          - IMMICH_POSTGRES_USER
+          - PIFIVE_TAILSCALE_USER
       ssh_host:
         required: true
-        type: string
-        description: "SSH Hostname/IP"
+        type: choice
+        description: "SSH Hostname/IP Variable Name"
+        options:
+          - FILE_NEXUS_SERVER_HOST
+          - IMMICH_ML_HOST
+          - IMMICH_SERVER_HOST
+          - IMMICH_POSTGRES_HOST
+          - PIFIVE_TAILSCALE_HOST
       app_directory:
         required: true
-        type: string
+        type: choice
         description: "Directory containing the docker-compose file (relative to repo root)"
+        options:
+          - action-runner
+          - autoheal
+          - file-nexus
+          - fintrack
+          - immich
+          - open-webui
+          - tailscales
       docker_compose_file:
         required: true
-        type: string
+        type: choice
         description: "Name of the docker-compose file"
+        options:
+          - runner.yml
+          - autoheal-stack.yml
+          - file-nexus-prod-stack.yml
+          - fintrack-prod-stack.yml
+          - hwaccel.ml.yml
+          - immich-machine-learning.yml
+          - immich-server.yml
+          - postgres.yml
+          - open-webui.yml
+          - network-holder.yml
+          - pifive-tailscale.yml
       repo_dir:
         required: false
         type: string
@@ -29,17 +61,44 @@ jobs:
   docker-down:
     runs-on: ubuntu-latest
     steps:
+      - name: Resolve Inputs
+        id: resolve
+        env:
+          FILE_NEXUS_SERVER_USER: ${{ vars.FILE_NEXUS_SERVER_USER }}
+          IMMICH_ML_USER: ${{ vars.IMMICH_ML_USER }}
+          IMMICH_SERVER_USER: ${{ vars.IMMICH_SERVER_USER }}
+          IMMICH_POSTGRES_USER: ${{ vars.IMMICH_POSTGRES_USER }}
+          PIFIVE_TAILSCALE_USER: ${{ vars.PIFIVE_TAILSCALE_USER }}
+          FILE_NEXUS_SERVER_HOST: ${{ vars.FILE_NEXUS_SERVER_HOST }}
+          IMMICH_ML_HOST: ${{ vars.IMMICH_ML_HOST }}
+          IMMICH_SERVER_HOST: ${{ vars.IMMICH_SERVER_HOST }}
+          IMMICH_POSTGRES_HOST: ${{ vars.IMMICH_POSTGRES_HOST }}
+          PIFIVE_TAILSCALE_HOST: ${{ vars.PIFIVE_TAILSCALE_HOST }}
+        run: |
+          USER_VAR="${{ inputs.ssh_user }}"
+          HOST_VAR="${{ inputs.ssh_host }}"
+          
+          # Use indirect expansion to get the value
+          SSH_USER="${!USER_VAR}"
+          SSH_HOST="${!HOST_VAR}"
+          
+          echo "Resolving $USER_VAR to $SSH_USER"
+          echo "Resolving $HOST_VAR to $SSH_HOST"
+          
+          echo "ssh_user=$SSH_USER" >> $GITHUB_OUTPUT
+          echo "ssh_host=$SSH_HOST" >> $GITHUB_OUTPUT
+
       - name: Tailscale Connection
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           tags: tag:ci
           version: latest
-          ping: ${{ inputs.ssh_host }}
+          ping: ${{ steps.resolve.outputs.ssh_host }}
 
       - name: Docker Down
         run: |
-          ssh -o "StrictHostKeyChecking=no" ${{ inputs.ssh_user }}@${{ inputs.ssh_host }} "bash -s" << 'EOF'
+          ssh -o "StrictHostKeyChecking=no" ${{ steps.resolve.outputs.ssh_user }}@${{ steps.resolve.outputs.ssh_host }} "bash -s" << 'EOF'
             # Navigate to directory
             if [ -d ${{ inputs.repo_dir }}/${{ inputs.app_directory }} ]; then
               cd ${{ inputs.repo_dir }}/${{ inputs.app_directory }}
