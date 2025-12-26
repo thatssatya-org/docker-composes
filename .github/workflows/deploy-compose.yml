@@ -38,57 +38,15 @@ on:
         description: "Contents of the .env file"
 
 jobs:
-  prod-deploy:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Tailscale Connection
-        uses: tailscale/github-action@v4
-        with:
-          authkey: ${{ secrets.tailscale_authkey }}
-          tags: tag:ci
-          version: latest
-          ping: ${{ inputs.ssh_host }}
-
-      - name: Create .env file
-        env:
-          ENV_CONTENTS: ${{ secrets.env_file_contents }}
-        run: |
-          if [ -n "$ENV_CONTENTS" ]; then
-            echo "$ENV_CONTENTS" > .env
-          fi
-
-      - name: Copy .env file to remote
-        run: |
-          if [ -f .env ]; then
-            scp -o "StrictHostKeyChecking=no" .env ${{ inputs.ssh_user }}@${{ inputs.ssh_host }}:/tmp/.${{ inputs.app_directory }}.env
-          fi
-
-      - name: Deploy
-        run: |
-          ssh -o "StrictHostKeyChecking=no" ${{ inputs.ssh_user }}@${{ inputs.ssh_host }} "bash -s" << 'EOF'
-            # Update repository
-            if [ ! -d ${{ inputs.repo_dir }} ]; then
-              git clone https://github.com/${{ github.repository }}.git ${{ inputs.repo_dir }}
-            else
-              cd ${{ inputs.repo_dir }}
-              git pull
-            fi
-
-            # Move .env file if it was created
-            if [ -f /tmp/.${{ inputs.app_directory }}.env ]; then
-              mv /tmp/.${{ inputs.app_directory }}.env ${{ inputs.repo_dir }}/${{ inputs.app_directory }}/.env
-            fi
-
-            # Start services
-            cd ${{ inputs.repo_dir }}/${{ inputs.app_directory }}
-
-            docker compose -f ${{ inputs.docker_compose_file }} pull
-            docker compose -f ${{ inputs.docker_compose_file }} up -d --remove-orphans
-            
-            # Prune dangling images
-            docker image prune -f
-            
-            # Run post-deploy script
-            ${{ inputs.post_deploy_script }}
-          EOF
+  deploy-shim:
+    uses: ./.github/workflows/docker-up.yml
+    with:
+      ssh_user: ${{ inputs.ssh_user }}
+      ssh_host: ${{ inputs.ssh_host }}
+      app_directory: ${{ inputs.app_directory }}
+      docker_compose_file: ${{ inputs.docker_compose_file }}
+      repo_dir: ${{ inputs.repo_dir }}
+      post_deploy_script: ${{ inputs.post_deploy_script }}
+    secrets:
+      tailscale_authkey: ${{ secrets.tailscale_authkey }}
+      env_file_contents: ${{ secrets.env_file_contents }}
