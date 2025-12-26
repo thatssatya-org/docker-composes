@@ -6,7 +6,7 @@
       widgets:
         - type: calendar
           first-day-of-week: monday
-
+        - $include: nearby-aircraft.yml
         - type: rss
           limit: 10
           collapse-after: 3
@@ -23,6 +23,7 @@
 
         - type: twitch-channels
           channels:
+            - qoqsik
             - theprimeagen
             - j_blow
             - giantwaffle
@@ -32,6 +33,7 @@
 
     - size: full
       widgets:
+        - $include: caas.yml
         - type: group
           widgets:
             - type: hacker-news
@@ -57,11 +59,12 @@
     - size: small
       widgets:
         - type: weather
-          location: London, United Kingdom
+          location: Bengaluru, India
           units: metric # alternatively "imperial"
-          hour-format: 12h # alternatively "24h"
+          hour-format: 24h # alternatively "24h"
           # Optionally hide the location from being displayed in the widget
           # hide-location: true
+        - $include: random-fact.yml
 
         - type: markets
           markets:
@@ -83,6 +86,6 @@
           # token: ...
           repositories:
             - glanceapp/glance
-            - go-gitea/gitea
+            - tailscale/tailscale
             - immich-app/immich
-            - syncthing/syncthing
+            - pihole/pihole
