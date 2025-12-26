@@ -35,6 +35,8 @@ on:
           - immich
           - open-webui
           - tailscales
+          - glance
+          - wol-monitor
       docker_compose_file:
         required: true
         type: choice
@@ -51,6 +53,8 @@ on:
           - open-webui.yml
           - network-holder.yml
           - pifive-tailscale.yml
+          - glance.yml
+          - wol-monitor.yml
       repo_dir:
         required: false
         type: string
