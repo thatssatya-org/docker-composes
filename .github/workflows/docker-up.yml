@@ -1,0 +1,189 @@
+name: Docker Compose Up
+
+on:
+  workflow_dispatch:
+    inputs:
+      ssh_user:
+        required: true
+        type: choice
+        description: "SSH Username Variable Name"
+        options:
+          - FILE_NEXUS_SERVER_USER
+          - IMMICH_ML_USER
+          - IMMICH_SERVER_USER
+          - IMMICH_POSTGRES_USER
+          - PIFIVE_TAILSCALE_USER
+      ssh_host:
+        required: true
+        type: choice
+        description: "SSH Hostname/IP Variable Name"
+        options:
+          - FILE_NEXUS_SERVER_HOST
+          - IMMICH_ML_HOST
+          - IMMICH_SERVER_HOST
+          - IMMICH_POSTGRES_HOST
+          - PIFIVE_TAILSCALE_HOST
+      app_directory:
+        required: true
+        type: choice
+        description: "Directory containing the docker-compose file (relative to repo root)"
+        options:
+          - action-runner
+          - autoheal
+          - file-nexus
+          - fintrack
+          - immich
+          - open-webui
+          - tailscales
+      docker_compose_file:
+        required: true
+        type: choice
+        description: "Name of the docker-compose file"
+        options:
+          - runner.yml
+          - autoheal-stack.yml
+          - file-nexus-prod-stack.yml
+          - fintrack-prod-stack.yml
+          - hwaccel.ml.yml
+          - immich-machine-learning.yml
+          - immich-server.yml
+          - postgres.yml
+          - open-webui.yml
+          - network-holder.yml
+          - pifive-tailscale.yml
+      repo_dir:
+        required: false
+        type: string
+        default: "~/docker-composes"
+        description: "Directory on the remote server where the repo is cloned"
+      post_deploy_script:
+        required: false
+        type: string
+        default: ""
+        description: "Optional script to run after deployment"
+  
+  workflow_call:
+    inputs:
+      ssh_user:
+        required: true
+        type: string
+        description: "SSH Username"
+      ssh_host:
+        required: true
+        type: string
+        description: "SSH Hostname/IP"
+      app_directory:
+        required: true
+        type: string
+        description: "Directory containing the docker-compose file (relative to repo root)"
+      docker_compose_file:
+        required: true
+        type: string
+        description: "Name of the docker-compose file"
+      repo_dir:
+        required: false
+        type: string
+        default: "~/docker-composes"
+        description: "Directory on the remote server where the repo is cloned"
+      post_deploy_script:
+        required: false
+        type: string
+        default: ""
+        description: "Optional script to run after deployment"
+    secrets:
+      tailscale_authkey:
+        required: true
+        description: "Tailscale Auth Key"
+      env_file_contents:
+        required: false
+        description: "Contents of the .env file"
+
+jobs:
+  prod-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Resolve Inputs
+        id: resolve
+        env:
+          FILE_NEXUS_SERVER_USER: ${{ vars.FILE_NEXUS_SERVER_USER }}
+          IMMICH_ML_USER: ${{ vars.IMMICH_ML_USER }}
+          IMMICH_SERVER_USER: ${{ vars.IMMICH_SERVER_USER }}
+          IMMICH_POSTGRES_USER: ${{ vars.IMMICH_POSTGRES_USER }}
+          PIFIVE_TAILSCALE_USER: ${{ vars.PIFIVE_TAILSCALE_USER }}
+          FILE_NEXUS_SERVER_HOST: ${{ vars.FILE_NEXUS_SERVER_HOST }}
+          IMMICH_ML_HOST: ${{ vars.IMMICH_ML_HOST }}
+          IMMICH_SERVER_HOST: ${{ vars.IMMICH_SERVER_HOST }}
+          IMMICH_POSTGRES_HOST: ${{ vars.IMMICH_POSTGRES_HOST }}
+          PIFIVE_TAILSCALE_HOST: ${{ vars.PIFIVE_TAILSCALE_HOST }}
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Triggered by workflow_dispatch. Resolving variables..."
+            USER_VAR="${{ inputs.ssh_user }}"
+            HOST_VAR="${{ inputs.ssh_host }}"
+            
+            # Use indirect expansion to get the value
+            SSH_USER="${!USER_VAR}"
+            SSH_HOST="${!HOST_VAR}"
+          else
+            echo "Triggered by workflow_call. Using inputs directly..."
+            SSH_USER="${{ inputs.ssh_user }}"
+            SSH_HOST="${{ inputs.ssh_host }}"
+          fi
+          
+          echo "Resolving user to $SSH_USER"
+          echo "Resolving host to $SSH_HOST"
+          
+          echo "ssh_user=$SSH_USER" >> $GITHUB_OUTPUT
+          echo "ssh_host=$SSH_HOST" >> $GITHUB_OUTPUT
+
+      - name: Tailscale Connection
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY || secrets.tailscale_authkey }}
+          tags: tag:ci
+          version: latest
+          ping: ${{ steps.resolve.outputs.ssh_host }}
+
+      - name: Create .env file
+        env:
+          ENV_CONTENTS: ${{ secrets.env_file_contents }}
+        run: |
+          if [ -n "$ENV_CONTENTS" ]; then
+            echo "$ENV_CONTENTS" > .env
+          fi
+
+      - name: Copy .env file to remote
+        run: |
+          if [ -f .env ]; then
+            scp -o "StrictHostKeyChecking=no" .env ${{ steps.resolve.outputs.ssh_user }}@${{ steps.resolve.outputs.ssh_host }}:/tmp/.${{ inputs.app_directory }}.env
+          fi
+
+      - name: Deploy
+        run: |
+          ssh -o "StrictHostKeyChecking=no" ${{ steps.resolve.outputs.ssh_user }}@${{ steps.resolve.outputs.ssh_host }} "bash -s" << 'EOF'
+            # Update repository
+            if [ ! -d ${{ inputs.repo_dir }} ]; then
+              git clone https://github.com/${{ github.repository }}.git ${{ inputs.repo_dir }}
+            else
+              cd ${{ inputs.repo_dir }}
+              git pull
+            fi
+
+            # Move .env file if it was created
+            if [ -f /tmp/.${{ inputs.app_directory }}.env ]; then
+              mv /tmp/.${{ inputs.app_directory }}.env ${{ inputs.repo_dir }}/${{ inputs.app_directory }}/.env
+            fi
+
+            # Start services
+            cd ${{ inputs.repo_dir }}/${{ inputs.app_directory }}
+
+            docker compose -f ${{ inputs.docker_compose_file }} pull
+            docker compose -f ${{ inputs.docker_compose_file }} up -d --remove-orphans
+            
+            # Prune dangling images
+            docker image prune -f
+            
+            # Run post-deploy script
+            ${{ inputs.post_deploy_script }}
+          EOF

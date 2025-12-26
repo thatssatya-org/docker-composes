@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/deploy-compose.yml
+    uses: ./.github/workflows/docker-up.yml
     with:
       ssh_user: ${{ vars.FILE_NEXUS_SERVER_USER }}
       ssh_host: ${{ vars.FILE_NEXUS_SERVER_HOST }}

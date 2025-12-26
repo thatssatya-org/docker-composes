@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/deploy-compose.yml
+    uses: ./.github/workflows/docker-up.yml
     with:
       ssh_user: ${{ vars.PIFIVE_TAILSCALE_USER }}
       ssh_host: ${{ vars.PIFIVE_TAILSCALE_HOST }}
