@@ -6,7 +6,7 @@
       widgets:
         - type: calendar
           first-day-of-week: monday
-        # - $include: nearby-aircraft.yml
+        - $include: nearby-aircraft.yml
         - type: rss
           limit: 10
           collapse-after: 3
