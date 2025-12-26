@@ -22,4 +22,4 @@ jobs:
       docker_compose_file: glance.yml
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-      env_file_contents: ${{ secrets.GLANCE_DOT_ENV_SECRETS }}
+      env_file_contents: ${{ vars.GLANCE_DOT_ENV_SECRETS }}
