@@ -11,8 +11,8 @@ services:
   #     - nginxproxymanager
 
   tailscale:
-    depends_on:
-      - network-holder
+    # depends_on:
+      # - network-holder
     cap_add:
       - NET_ADMIN
       - NET_RAW
