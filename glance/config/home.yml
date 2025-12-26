@@ -88,4 +88,4 @@
             - glanceapp/glance
             - tailscale/tailscale
             - immich-app/immich
-            - pihole/pihole
+            - pi-hole/pi-hole
