@@ -1,0 +1,53 @@
+name: Manual Docker Compose Down
+
+on:
+  workflow_dispatch:
+    inputs:
+      ssh_user:
+        required: true
+        type: string
+        description: "SSH Username"
+      ssh_host:
+        required: true
+        type: string
+        description: "SSH Hostname/IP"
+      app_directory:
+        required: true
+        type: string
+        description: "Directory containing the docker-compose file (relative to repo root)"
+      docker_compose_file:
+        required: true
+        type: string
+        description: "Name of the docker-compose file"
+      repo_dir:
+        required: false
+        type: string
+        default: "~/docker-composes"
+        description: "Directory on the remote server where the repo is cloned"
+
+jobs:
+  docker-down:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tailscale Connection
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          tags: tag:ci
+          version: latest
+          ping: ${{ inputs.ssh_host }}
+
+      - name: Docker Down
+        run: |
+          ssh -o "StrictHostKeyChecking=no" ${{ inputs.ssh_user }}@${{ inputs.ssh_host }} "bash -s" << 'EOF'
+            # Navigate to directory
+            if [ -d ${{ inputs.repo_dir }}/${{ inputs.app_directory }} ]; then
+              cd ${{ inputs.repo_dir }}/${{ inputs.app_directory }}
+              
+              echo "Bringing down ${{ inputs.docker_compose_file }}..."
+              docker compose -f ${{ inputs.docker_compose_file }} down
+            else
+              echo "Directory ${{ inputs.repo_dir }}/${{ inputs.app_directory }} does not exist."
+              exit 1
+            fi
+          EOF
