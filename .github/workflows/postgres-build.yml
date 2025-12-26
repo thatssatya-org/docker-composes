@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/docker-up.yml
+    uses: ./.github/workflows/deploy-compose.yml
     with:
       ssh_user: ${{ vars.IMMICH_POSTGRES_USER }}
       ssh_host: ${{ vars.IMMICH_POSTGRES_HOST }}
