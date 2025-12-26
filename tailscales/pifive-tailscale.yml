@@ -172,8 +172,8 @@ services:
           echo "No RAW_SERVICES provided."
         fi
 
-        echo "Advertisement process finished. Exiting."
-        exit 0
+        echo "Advertisement process finished. Staying alive..."
+        tail -f /dev/null
       '
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
