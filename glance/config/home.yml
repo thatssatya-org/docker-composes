@@ -7,6 +7,7 @@
         - type: calendar
           first-day-of-week: monday
         - $include: nearby-aircraft.yml
+        - $include: aqi.yml
         - type: rss
           limit: 10
           collapse-after: 3
