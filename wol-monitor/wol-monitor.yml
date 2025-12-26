@@ -1,0 +1,9 @@
+services:
+  wol-monitor:
+    build: .
+    container_name: wol-monitor
+    network_mode: host
+    restart: unless-stopped
+    mem_limit: 64m
+    env_file:
+      - .env

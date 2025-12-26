@@ -1,0 +1,25 @@
+name: Deploy WOL Monitor
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'wol-monitor/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-compose.yml
+    with:
+      ssh_user: ${{ vars.FILE_NEXUS_SERVER_USER }}
+      ssh_host: ${{ vars.FILE_NEXUS_SERVER_HOST }}
+      app_directory: wol-monitor
+      docker_compose_file: wol-monitor.yml
+    secrets:
+      tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+      env_file_contents: ${{ secrets.WOL_MONITOR_DOT_ENV_SECRETS }}
