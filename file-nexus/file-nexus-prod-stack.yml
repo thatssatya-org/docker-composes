@@ -6,9 +6,9 @@ services:
     image: thatssatyadocker/file-nexus:latest
     env_file:
       - .env
-    network_mode: container:tailscale
-    # networks:
-      # - nginxproxymanager
+    # network_mode: container:tailscale
+    networks:
+      - nginxproxymanager
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "ping", "-c", "2", "100.100.100.100"]
@@ -19,7 +19,7 @@ services:
     labels:
       - "autoheal=true"
 
-# networks:
-  # nginxproxymanager:
-    # name: nginxproxymanager
-    # external: true
+networks:
+  nginxproxymanager:
+    name: nginxproxymanager
+    external: true
