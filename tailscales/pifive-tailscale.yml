@@ -80,6 +80,7 @@ services:
         fi
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH}/serve.json:/serve.json:ro
     env_file:
       - .env
     networks:
