@@ -1,12 +1,24 @@
 name: file-nexus-prod
 services:
+  temporal-proxy:
+    image: alpine/socat
+    container_name: temporal-proxy
+    mem_limit: 64m
+    networks:
+      - nginxproxymanager
+    env_file:
+      - .env
+    restart: unless-stopped
+    command: TCP4-LISTEN:7233,fork,reuseaddr SOCKS5:tailscale:${TEMPORAL_SERVER_DOMAIN}:7233,socksport=1055
+
   file-nexus:
     container_name: file-nexus
+    depends_on:
+      - temporal-proxy
     mem_limit: 512m
     image: thatssatyadocker/file-nexus:latest
     env_file:
       - .env
-    # network_mode: container:tailscale
     networks:
       - nginxproxymanager
     restart: unless-stopped
