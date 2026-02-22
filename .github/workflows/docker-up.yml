@@ -193,6 +193,13 @@ jobs:
             
             # Prune dangling images
             docker image prune -f
+
+            # Load the .env file into the shell environment so the script can use it
+            if [ -f .env ]; then
+              set -a
+              source .env
+              set +a
+            fi
             
             # Run post-deploy script
             ${{ inputs.post_deploy_script }}
