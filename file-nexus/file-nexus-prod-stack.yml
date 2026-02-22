@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    command: TCP4-LISTEN:7233,fork,reuseaddr SOCKS5:tailscale:${TEMPORAL_SERVER_DOMAIN}:7233,socksport=1055
+    command: TCP4-LISTEN:7233,fork,reuseaddr SOCKS5:tailscale:${TEMPORAL_SERVER_DOMAIN}:443,socksport=1055
 
   file-nexus:
     container_name: file-nexus
