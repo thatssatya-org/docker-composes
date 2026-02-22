@@ -53,7 +53,7 @@ services:
         source: /dev/net/tun
         target: /dev/net/tun
       - type: bind
-        source: ${HOME}/apps/pifive-tailscale/config
+        source: ${{ PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH }}
         target: /usr/tailscale/config
 
   tailscale-services-advertiser:
