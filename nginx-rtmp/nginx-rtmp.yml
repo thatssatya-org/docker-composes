@@ -1,0 +1,20 @@
+name: nginx-rtmp
+
+services:
+  nginx-rtmp:
+    image: alfg/nginx-rtmp:latest
+    container_name: nginx-rtmp-server
+    restart: unless-stopped
+    mem_limit: 128m
+    ports:
+      - "1935:1935" # RTMP port
+      - "8080:80"   # HTTP port for stream stats (optional)
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - $HOME/apps/nginx-rtmp/recordings/action4:/opt/data/recordings
+    networks:
+      - nginxproxymanager
+
+networks:
+  nginxproxymanager:
+    external: true
