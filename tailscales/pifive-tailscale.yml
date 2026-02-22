@@ -51,12 +51,18 @@ services:
     restart: always
     command: >
       sh -c '
+        # Install jq
+        apk add --no-cache jq
+        
         echo "Waiting for tailscale container to be ready..."
         until docker exec tailscale tailscale status > /dev/null 2>&1; do
           sleep 5
         done
         echo "Tailscale is ready."
 
+        $$RAW_SERVICES=$$(jq -r '[.Services | to_entries[] | select(.value.Web) | .key | sub("^svc:"; "")] | join(",")' /serve.json)  
+        echo "Extracted services: $$RAW_SERVICES"
+        
         if [ -n "$$RAW_SERVICES" ]; then
           echo "Found services to advertise using RAW_SERVICES variable."
           # Remove single/double quotes and replace commas with spaces
@@ -70,9 +76,6 @@ services:
         else
           echo "No RAW_SERVICES provided."
         fi
-
-        echo "Advertisement process finished. Staying alive..."
-        tail -f /dev/null
       '
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
