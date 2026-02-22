@@ -49,8 +49,10 @@ services:
       - tailscale
     image: docker:cli
     restart: always
-    command: >
-      sh -c '
+    command:
+      - /bin/sh
+      - -c
+      - |
         # Install jq
         apk add --no-cache jq
         
@@ -60,7 +62,7 @@ services:
         done
         echo "Tailscale is ready."
 
-        $$RAW_SERVICES=$$(jq -r '[.Services | to_entries[] | select(.value.Web) | .key | sub("^svc:"; "")] | join(",")' /serve.json)  
+        RAW_SERVICES=$$(jq -r '[.Services | to_entries[] | select(.value.Web) | .key | sub("^svc:"; "")] | join(",")' /serve.json)  
         echo "Extracted services: $$RAW_SERVICES"
         
         if [ -n "$$RAW_SERVICES" ]; then
@@ -76,7 +78,6 @@ services:
         else
           echo "No RAW_SERVICES provided."
         fi
-      '
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     env_file:
