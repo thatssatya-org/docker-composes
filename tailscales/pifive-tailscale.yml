@@ -44,6 +44,18 @@ services:
         source: ${PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH}
         target: /usr/tailscale/config
 
+  temporal-tcp-proxy:
+    image: alpine/socat
+    container_name: temporal-tcp-proxy
+    mem_limit: 64m
+    network_mode: service:tailscale
+    depends_on:
+      - tailscale
+    env_file:
+      - .env
+    restart: unless-stopped
+    command: TCP4-LISTEN:7233,fork,reuseaddr TCP4:${TEMPORAL_SERVER_DOMAIN}:${TEMPORAL_SERVER_PORT}
+
   tailscale-services-advertiser:
     depends_on:
       - tailscale
