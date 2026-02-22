@@ -28,3 +28,4 @@ jobs:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       env_file_contents: |
         RAW_SERVICES='${{ vars.PIFIVE_TAILSCALE_SERVICES }}'
+        PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH='${{ vars.PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH }}'
