@@ -2,7 +2,7 @@ name: nginx-rtmp
 
 services:
   nginx-rtmp:
-    image: alfg/nginx-rtmp:latest
+    image: tiangolo/nginx-rtmp:latest
     container_name: nginx-rtmp-server
     restart: unless-stopped
     mem_limit: 128m
