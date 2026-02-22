@@ -62,7 +62,8 @@ services:
         done
         echo "Tailscale is ready."
 
-        RAW_SERVICES=$$(jq -r '[.Services | to_entries[] | select(.value.Web) | .key | sub("^svc:"; "")] | join(",")' /serve.json)  
+        # Extract service names from serve config 
+        RAW_SERVICES=$$(jq -r '[.Services | to_entries[] | .key | sub("^svc:"; "")] | join(",")' /serve.json)  
         echo "Extracted services: $$RAW_SERVICES"
         
         if [ -n "$$RAW_SERVICES" ]; then
