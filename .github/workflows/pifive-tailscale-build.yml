@@ -22,13 +22,12 @@ jobs:
       docker_compose_file: pifive-tailscale.yml
       post_deploy_script: |
         echo "Creating serve config file..."
-        echo $PIFIVE_TAILSCALE_SERVE_CONFIG
-        echo "$PIFIVE_TAILSCALE_SERVE_CONFIG" > "$PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH/serve.json"
+        echo "$TAILSCALE_SERVE_CONFIG" > "$TAILSCALE_SERVE_CONFIG_HOST_PATH/serve.json"
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       env_file_contents: |
-        PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH='${{ vars.PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH }}'
-        PIFIVE_TAILSCALE_SERVE_CONFIG='${{ vars.PIFIVE_TAILSCALE_SERVE_CONFIG }}'
+        TAILSCALE_SERVE_CONFIG_HOST_PATH='${{ vars.PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH }}'
+        TAILSCALE_SERVE_CONFIG='${{ vars.PIFIVE_TAILSCALE_SERVE_CONFIG }}'
         TEMPORAL_SERVER_DOMAIN='${{ vars.TEMPORAL_SERVER_DOMAIN }}'
         TEMPORAL_SERVER_PORT='${{ vars.TEMPORAL_SERVER_PORT }}'
         TEMPORAL_TCP_PROXY_ENABLED='true'
