@@ -21,8 +21,8 @@ services:
     environment:
       # - TS_ACCEPT_DNS=true
       - TS_AUTHKEY=
-      - TS_EXTRA_ARGS=--accept-dns=true --advertise-exit-node=true --ssh --accept-routes --advertise-tags=tag:pifive-container-gateway
-      - TS_HOSTNAME=pifive-tailscale
+      - TS_EXTRA_ARGS=--accept-dns=true --advertise-exit-node=true --ssh --accept-routes --advertise-tags=${TS_TAGS}
+      - TS_HOSTNAME=${TS_HOSTNAME}
       # - TS_ROUTES=
       - TS_SERVE_CONFIG=/usr/tailscale/config/serve.json
       - TS_STATE_DIR=/var/lib/tailscale
@@ -54,7 +54,16 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    command: TCP4-LISTEN:7233,fork,reuseaddr TCP4:${TEMPORAL_SERVER_DOMAIN}:${TEMPORAL_SERVER_PORT}
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        if [ "${TEMPORAL_TCP_PROXY_ENABLED:-false}" = "true" ]; then
+          echo "Starting Temporal TCP Proxy..."
+          exec socat TCP4-LISTEN:7233,fork,reuseaddr "TCP4:${TEMPORAL_SERVER_DOMAIN}:${TEMPORAL_SERVER_PORT}"
+        else
+          echo "Temporal TCP Proxy disabled. Exiting..."
+          exit 0
+        fi
 
   tailscale-services-advertiser:
     depends_on:
@@ -65,31 +74,36 @@ services:
       - /bin/sh
       - -c
       - |
-        # Install jq
-        apk add --no-cache jq
-        
-        echo "Waiting for tailscale container to be ready..."
-        until docker exec tailscale tailscale status > /dev/null 2>&1; do
-          sleep 5
-        done
-        echo "Tailscale is ready."
-
-        # Extract service names from serve config 
-        RAW_SERVICES=$$(jq -r '[.Services | to_entries[] | .key | sub("^svc:"; "")] | join(",")' /serve.json)  
-        echo "Extracted services: $$RAW_SERVICES"
-        
-        if [ -n "$$RAW_SERVICES" ]; then
-          echo "Found services to advertise using RAW_SERVICES variable."
-          # Remove single/double quotes and replace commas with spaces
-          CLEAN_SERVICES=$$(echo "$$RAW_SERVICES" | tr -d "\047\042" | tr "," " ")
+        if [ "${TAILSCALE_SERVICES_ADVERTISER_ENABLED:-false}" = "true" ]; then
+          # Install jq
+          apk add --no-cache jq
           
-          for SERVICE in $$CLEAN_SERVICES; do
-            if [ -z "$$SERVICE" ]; then continue; fi
-            echo "Advertising service: $$SERVICE"
-            docker exec tailscale tailscale serve advertise "svc:$$SERVICE" || echo "Failed to advertise $$SERVICE"
+          echo "Waiting for tailscale container to be ready..."
+          until docker exec tailscale tailscale status > /dev/null 2>&1; do
+            sleep 5
           done
+          echo "Tailscale is ready."
+
+          # Extract service names from serve config 
+          RAW_SERVICES=$$(jq -r '[.Services | to_entries[] | .key | sub("^svc:"; "")] | join(",")' /serve.json)  
+          echo "Extracted services: $$RAW_SERVICES"
+          
+          if [ -n "$$RAW_SERVICES" ]; then
+            echo "Found services to advertise using RAW_SERVICES variable."
+            # Remove single/double quotes and replace commas with spaces
+            CLEAN_SERVICES=$$(echo "$$RAW_SERVICES" | tr -d "\047\042" | tr "," " ")
+            
+            for SERVICE in $$CLEAN_SERVICES; do
+              if [ -z "$$SERVICE" ]; then continue; fi
+              echo "Advertising service: $$SERVICE"
+              docker exec tailscale tailscale serve advertise "svc:$$SERVICE" || echo "Failed to advertise $$SERVICE"
+            done
+          else
+            echo "No RAW_SERVICES provided."
+          fi
         else
-          echo "No RAW_SERVICES provided."
+          echo "Tailscale Services Advertiser disabled. Exiting..."
+          exit 0
         fi
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

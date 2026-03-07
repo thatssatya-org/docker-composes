@@ -31,3 +31,7 @@ jobs:
         PIFIVE_TAILSCALE_SERVE_CONFIG='${{ vars.PIFIVE_TAILSCALE_SERVE_CONFIG }}'
         TEMPORAL_SERVER_DOMAIN='${{ vars.TEMPORAL_SERVER_DOMAIN }}'
         TEMPORAL_SERVER_PORT='${{ vars.TEMPORAL_SERVER_PORT }}'
+        TEMPORAL_TCP_PROXY_ENABLED='true'
+        TAILSCALE_SERVICES_ADVERTISER_ENABLED='true'
+        TS_TAGS='tag:pifive-container-gateway'
+        TS_HOSTNAME='pifive-tailscale'

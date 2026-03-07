@@ -1,0 +1,27 @@
+name: Deploy pc-tailscale
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tailscales/pifive-tailscale.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-compose.yml
+    with:
+      ssh_user: ${{ vars.IMMICH_ML_USER }}
+      ssh_host: ${{ vars.IMMICH_ML_HOST }}
+      app_directory: tailscales
+      docker_compose_file: pifive-tailscale.yml
+    secrets:
+      tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+      env_file_contents: |
+        TS_TAGS='tag:pc-container-gateway'
+        TS_HOSTNAME='pc-tailscale'
