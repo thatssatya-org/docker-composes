@@ -3,6 +3,8 @@ services:
     image: ghcr.io/obeone/nfs-server:latest
     container_name: nfs-server
     restart: unless-stopped
+    environment:
+      - NFS_LOG_LEVEL: DEBUG
     volumes:
       # Mount your host share folder to /shared inside the container
       - ~/apps/immich/library:/shared
