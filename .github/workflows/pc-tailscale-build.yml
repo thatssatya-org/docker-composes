@@ -26,7 +26,7 @@ jobs:
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       env_file_contents: |
-        TAILSCALE_SERVE_CONFIG_HOST_PATH='${{ vars.PIFIVE_TAILSCALE_SERVE_CONFIG_HOST_PATH }}'
+        TAILSCALE_SERVE_CONFIG_HOST_PATH='${{ vars.PC_TAILSCALE_SERVE_CONFIG_HOST_PATH }}'
         TAILSCALE_SERVE_CONFIG='${{ vars.PC_TAILSCALE_SERVE_CONFIG }}'
         TAILSCALE_SERVICES_ADVERTISER_ENABLED='true'
         TS_TAGS='tag:pc-container-gateway'

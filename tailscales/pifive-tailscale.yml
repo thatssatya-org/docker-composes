@@ -107,7 +107,7 @@ services:
         fi
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${TAILSCALE_SERVE_CONFIG_HOST_PATH}/serve.json:/serve.json:ro
+      - ${TAILSCALE_SERVE_CONFIG_HOST_PATH}:/:ro
     env_file:
       - .env
     networks:
