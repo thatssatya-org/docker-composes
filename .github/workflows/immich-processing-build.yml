@@ -1,11 +1,11 @@
-name: Deploy immich ML
+name: Deploy immich processing
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'immich/immich-machine-learning.yml'
+      - 'immich/immich-processing.yml'
   workflow_dispatch:
 
 concurrency:
@@ -19,7 +19,7 @@ jobs:
       ssh_user: ${{ vars.IMMICH_ML_USER }}
       ssh_host: ${{ vars.IMMICH_ML_HOST }}
       app_directory: immich
-      docker_compose_file: immich-machine-learning.yml
+      docker_compose_file: immich-processing.yml
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       env_file_contents: ${{ secrets.IMMICH_DOT_ENV_SECRETS }}
