@@ -22,7 +22,7 @@ jobs:
       docker_compose_file: pifive-tailscale.yml
       post_deploy_script: |
         echo "Creating serve config file..."
-        echo "$TAILSCALE_SERVE_CONFIG" > "$TAILSCALE_SERVE_CONFIG_HOST_PATH/serve.json"
+        sudo echo "$TAILSCALE_SERVE_CONFIG" > "$TAILSCALE_SERVE_CONFIG_HOST_PATH/serve.json"
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       env_file_contents: |
