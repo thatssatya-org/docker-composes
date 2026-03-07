@@ -21,6 +21,5 @@ services:
     cap_add:
       - SYS_ADMIN
       - SETPCAP
-    restart: unless-stopped
     security_opt:
       - apparmor:unconfined
