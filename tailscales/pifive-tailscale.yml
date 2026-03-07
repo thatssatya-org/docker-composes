@@ -60,7 +60,7 @@ services:
     depends_on:
       - tailscale
     image: docker:cli
-    restart: always
+    restart: unless-stopped
     command:
       - /bin/sh
       - -c
