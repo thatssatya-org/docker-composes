@@ -116,3 +116,4 @@ services:
 networks:
   nginxproxymanager:
     name: nginxproxymanager
+    external: true
