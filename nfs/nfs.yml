@@ -1,6 +1,6 @@
 services:
   nfs:
-    image: obeoneorg/nfs-server:v2.2.3
+    image: ghcr.io/obeone/nfs-server:latest
     container_name: nfs-server
     restart: unless-stopped
     volumes:
@@ -19,8 +19,8 @@ services:
       # - "32767:32767/udp"
     mem_limit: 128m
     privileged: true
-    cap_add:
-      - SYS_ADMIN
-      - SETPCAP
-    security_opt:
-      - apparmor:unconfined
+    # cap_add:
+    #   - SYS_ADMIN
+    #   - SETPCAP
+    # security_opt:
+    #   - apparmor:unconfined
