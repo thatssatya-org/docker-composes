@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'immich/**'
+      - 'immich/immich-processing.yml'
+      - 'immich/hwaccel.transcoding.yml'
+      - 'immich/hwaccel.ml.yml'
   workflow_dispatch:
 
 concurrency:
