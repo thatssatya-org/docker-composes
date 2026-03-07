@@ -1,6 +1,6 @@
 services:
   nfs:
-    image: erichough/nfs-server
+    image: obeoneorg/nfs-server:v2.2.3
     container_name: nfs-server
     restart: unless-stopped
     volumes:
@@ -10,13 +10,13 @@ services:
       - ./exports:/etc/exports:ro
     ports:
       - "2049:2049"
-      - "2049:2049/udp"
-      - "111:111"
-      - "111:111/udp"
-      - "32765:32765"
-      - "32765:32765/udp"
-      - "32767:32767"
-      - "32767:32767/udp"
+      # - "2049:2049/udp"
+      # - "111:111"
+      # - "111:111/udp"
+      # - "32765:32765"
+      # - "32765:32765/udp"
+      # - "32767:32767"
+      # - "32767:32767/udp"
     mem_limit: 128m
     cap_add:
       - SYS_ADMIN
