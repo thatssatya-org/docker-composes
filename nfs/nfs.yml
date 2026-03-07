@@ -1,0 +1,25 @@
+services:
+  nfs:
+    image: erichough/nfs-server
+    container_name: nfs-server
+    restart: unless-stopped
+    volumes:
+      # Mount your host share folder to /shared inside the container
+      - ~/apps/immich/library:/shared
+      # Mount your custom exports file
+      - ./exports:/etc/exports:ro
+    ports:
+      - "2049:2049"
+      - "2049:2049/udp"
+      - "111:111"
+      - "111:111/udp"
+      - "32765:32765"
+      - "32765:32765/udp"
+      - "32767:32767"
+      - "32767:32767/udp"
+    mem_limit: 128m
+    cap_add:
+      - SYS_ADMIN
+      - SETPCAP
+    security_opt:
+      - apparmor:unconfined
