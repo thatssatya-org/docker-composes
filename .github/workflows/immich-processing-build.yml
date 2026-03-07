@@ -22,4 +22,4 @@ jobs:
       docker_compose_file: immich-processing.yml
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-      env_file_contents: ${{ secrets.IMMICH_DOT_ENV_SECRETS }}
+      env_file_contents: ${{ secrets.IMMICH_PROCESSING_DOT_ENV_SECRETS }}
