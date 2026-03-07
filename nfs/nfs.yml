@@ -18,6 +18,7 @@ services:
       # - "32767:32767"
       # - "32767:32767/udp"
     mem_limit: 128m
+    privileged: true
     cap_add:
       - SYS_ADMIN
       - SETPCAP
