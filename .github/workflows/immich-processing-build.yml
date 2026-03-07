@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'immich/immich-processing.yml'
+      - 'immich/**'
   workflow_dispatch:
 
 concurrency:

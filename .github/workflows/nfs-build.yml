@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'nfs/nfs.yml'
+      - 'nfs/**'
   workflow_dispatch:
 
 concurrency:

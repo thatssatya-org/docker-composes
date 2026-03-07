@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'nginx-rtmp/nginx-rtmp.yml'
+      - 'nginx-rtmp/**'
   workflow_dispatch:
 
 concurrency:
