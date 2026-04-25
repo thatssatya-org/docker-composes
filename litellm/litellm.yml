@@ -12,7 +12,7 @@ services:
       - .env
     # ports:
     #   - "4000:4000"
-    mem_limit: 512m
+    mem_limit: 768m
     environment:
       - LITELLM_CONFIG_PATH=/app/config.yaml
     networks:
