@@ -8,7 +8,7 @@ services:
     volumes:
       - ~/apps/litellm/pgdata:/var/lib/postgresql/data
     networks:
-      - nginxproxymanager
+      - openclaw_default
     mem_limit: 256m
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U samsepiol -d litellm"]
@@ -33,8 +33,8 @@ services:
     environment:
       - LITELLM_CONFIG_PATH=/app/config.yaml
     networks:
-      - nginxproxymanager
+      - openclaw_default
 
 networks:
-  nginxproxymanager:
+  openclaw_default:
     external: true
