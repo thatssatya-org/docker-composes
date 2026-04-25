@@ -9,6 +9,7 @@ services:
       - ~/apps/litellm/pgdata:/var/lib/postgresql/data
     networks:
       - nginxproxymanager
+    mem_limit: 256m
 
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
