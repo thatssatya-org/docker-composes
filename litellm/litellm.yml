@@ -23,7 +23,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    user: "1000:1000"
+    # user: "1000:1000"
     volumes:
       - ~/apps/litellm/litellm_config.yaml:/app/config.yaml:ro
     tmpfs:
