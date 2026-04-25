@@ -30,9 +30,6 @@ services:
       - /app/logs:size=64M,mode=1777
     env_file:
       - .env
-    # ports:
-    #   - "4000:4000"
-    # mem_limit: 512m
     environment:
       - LITELLM_CONFIG_PATH=/app/config.yaml
     networks:
