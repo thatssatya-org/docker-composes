@@ -22,4 +22,4 @@ jobs:
       docker_compose_file: litellm.yml
     secrets:
       tailscale_authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-      env_file_contents: ${{ secrets.LITELLM_ENV }}
+      env_file_contents: ${{ secrets.LITELLM_DOT_ENV_SECRETS }}
