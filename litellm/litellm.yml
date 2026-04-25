@@ -1,8 +1,22 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: litellm-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ~/apps/litellm/pgdata:/var/lib/postgresql/data
+    networks:
+      - nginxproxymanager
+
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm-gateway
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     user: "1000:1000"
     volumes:
       - ~/apps/litellm/litellm_config.yaml:/app/config.yaml:ro
