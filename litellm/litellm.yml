@@ -17,7 +17,7 @@ services:
       retries: 5
 
   litellm:
-    image: gghcr.io/berriai/litellm:main-latest
+    image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm-gateway
     restart: unless-stopped
     depends_on:
