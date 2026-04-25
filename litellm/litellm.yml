@@ -34,7 +34,10 @@ services:
       - LITELLM_CONFIG_PATH=/app/config.yaml
     networks:
       - openclaw_default
+      - nginxproxymanager
 
 networks:
   openclaw_default:
+    external: true
+  nginxproxymanager:
     external: true
