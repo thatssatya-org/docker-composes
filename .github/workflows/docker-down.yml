@@ -34,6 +34,7 @@ on:
           - fintrack
           - immich
           - open-webui
+          - litellm
           - tailscales
           - glance
           - wol-monitor
@@ -51,6 +52,7 @@ on:
           - immich-server.yml
           - postgres.yml
           - open-webui.yml
+          - litellm.yml
           - network-holder.yml
           - pifive-tailscale.yml
           - glance.yml
