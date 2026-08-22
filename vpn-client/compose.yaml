@@ -1,0 +1,25 @@
+services:
+  openvpn:
+    build:
+      context: .
+    container_name: uni-openvpn
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./openvpn-client.ovpn:/etc/openvpn/client.ovpn:ro
+    tmpfs:
+      - /tmp
+      - /run
+    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /run/openvpn/connected"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 45s
